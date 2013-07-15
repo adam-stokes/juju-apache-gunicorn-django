@@ -24,7 +24,7 @@
     RequestHeader set X-FORWARDED_PROTO "https"
 
     ProxyRequests off
-    ProxyPreserveHost off
+    ProxyPreserveHost on
     <Proxy *>
         Order Allow,Deny
         Allow from All
