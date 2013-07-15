@@ -11,9 +11,6 @@ juju-log "Jujuing ${UNIT_NAME}"
 function inflate {
     juju-log "Creating directory structure"
     mkdir -p ${UNIT_DIR}
-    mkdir -p /var/log/celery
-    mkdir -p /var/run/celery
-    mkdir -p ${UNIT_DIR}/.supportdb-cache
 }
 
 ###############################################################################
