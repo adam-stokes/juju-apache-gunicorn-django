@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+UNIT_NAME=`echo $JUJU_UNIT_NAME | cut -d/ -f1`
+
+relation-set working_dir="/srv/${UNIT_NAME}/"
+relation-set django_settings="${UNIT_DIR}/settings.py"
+relation-set python_path=`python -c "import django; print(django.__path__[0])"`
+
+variables="wsgi_wsgi_file wsgi_workers wsgi_worker_class wsgi_worker_connections wsgi_max_requests wsgi_timeout wsgi_backlog wsgi_keep_alive wsgi_extra wsgi_user wsgi_group wsgi_umask wsgi_log_file wsgi_log_level wsgi_access_logfile wsgi_access_logformat port"
+
+declare -A VAR
+for v in $variables;do
+  VAR[$v]=$(config-get $v)
+  if [ ! -z "${VAR[$v]}" ] ; then
+    relation-set "$v=${VAR[$v]}"
+  fi
+done
+
+juju-log "Set relation variables: ${VAR[@]}"
+
+service gunicorn restart

@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+source $(dirname "$0")/common.sh
+
+# Export for template parsing
+export UNIT_DIR
+export USER_CODE_RUNNER
+export GROUP_CODE_RUNNER
+
+###############################################################################
+# WEB Application Config
+# 1) Setup django application specific directory
+# 2) Symlinks admin media directory
+# 3) Populate database
+###############################################################################
+# 1)
+SETTINGS_PY="${UNIT_DIR}/settings.py"
+
+# 2)
+PYTHON_DJANGO_LIB=`python -c "import django; print(django.__path__[0])"`
+mkdir -p /var/www/static
+if [ ! -L /var/www/static/admin ]; then
+    ln -s ${PYTHON_DJANGO_LIB}/contrib/admin/static/admin /var/www/static/admin
+fi

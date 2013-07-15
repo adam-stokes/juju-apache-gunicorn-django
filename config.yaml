@@ -1,0 +1,48 @@
+options:
+  requirements:
+    type: string
+    default: "requirements.txt"
+    description: |
+      The relative path to the requirement file. Note that the charm
+      won't manually upgrade packages defined in this file.
+  instance_type:
+    default: "staging"
+    type: string
+    description: |
+      Selects if we're deploying to production or development.
+      production == deploying to production
+      staging == local development (lxc/private cloud)
+  user_code_runner:
+      default: "webguy"
+      type: string
+      description: The user that runs the code
+  group_code_runner:
+      default: "webguy"
+      type: string
+      description: The group that runs the code
+  user_code_owner:
+      default: "webops_deploy"
+      type: string
+      description: The user that owns the code
+  group_code_owner:
+      default: "webops_deploy"
+      type: string
+      description: The group that owns the code
+  app_payload:
+    type: string
+    description: |
+      Filename to use to extract the actual djangoapp.tar.bz2 application.
+      This file must be in the files directory.
+    default: "djangoapp.tar.bz2"
+  web_app_admin:
+    type: string
+    description: Web application admin email
+    default: "admin@example.com"
+  wsgi_wsgi_file:
+    type: string
+    description: "The name of the WSGI application."
+    default: "wsgi"
+  wsgi_worker_class:
+    type: string
+    default: "gevent"
+    description: "Gunicorn workers type. (eventlet|gevent|tornado)"

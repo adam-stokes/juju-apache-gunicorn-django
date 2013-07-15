@@ -1,0 +1,14 @@
+name: django-deploy-charm
+maintainer: [Adam Stokes <adam.stokes@ubuntu.com>]
+summary: Django deploy project
+description: |
+  Django website powered by Juju
+provides:
+  website:
+    interface: http
+  wsgi:
+    interface: wsgi
+    scope: container
+requires:
+  db:
+    interface: pgsql

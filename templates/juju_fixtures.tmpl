@@ -1,0 +1,30 @@
+<%
+import json
+from subprocess import Popen, PIPE
+
+def quickrun(cmd):
+    temp = Popen(cmd, stdout=PIPE).communicate()[0]
+    return temp.rstrip()
+
+adminpasswd = quickrun(['pwgen', '-s', '64', '1'])
+timestamp = quickrun(['date', '+%F %R'])
+
+fixture = { "pk" : 1,
+            "model" : "auth.user",
+            "fields" : { "username" : "admin",
+                         "password" : adminpasswd,
+                         "email" : "",
+                         "first_name" : "",
+                         "last_name" : "",
+                         "is_active" : True,
+                         "is_superuser" : True,
+                         "is_staff" : True,
+                         "last_login" : "now",
+                         "groups" : [],
+                         "user_permissions" : [],
+                         "date_joined" : timestamp
+                         }
+            }
+
+print json.dumps(fixture)
+%>

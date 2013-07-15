@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+# Update the juju_settings.py with the new database credentials
+
+source $(dirname "$0")/common.sh
+
+###############################################################################
+# Export Database settings
+###############################################################################
+export DBHOST=`relation-get host`
+export DBNAME=`relation-get database`
+export DBUSER=`relation-get user`
+export DBPASSWD=`relation-get password`
+
+# All values are set together, so checking on a single value is enough
+# If $db_user is not set, DB is still setting itself up, we exit awaiting 
+# next run.
+[ -z "$DBUSER" ] && exit 0
+
+cheetah fill --env -p templates/juju_settings.tmpl \
+    > ${UNIT_DIR}/juju_settings.py
+
+# Setup database
+python ${UNIT_DIR}/manage.py syncdb --noinput
+
+# Create admin fixture
+cheetah compile --env -p templates/juju_fixtures.tmpl \
+    > templates/juju_fixtures.py
+python templates/juju_fixtures.py \
+    > ${UNIT_DIR}/juju_fixtures.json
+
+python ${UNIT_DIR}/manage.py loaddata ./juju_fixtures.json
+
+juju-log "Updating database(${DBNAME}) credentials and importing fixtures"
+
+ctrl_service gunicorn restart

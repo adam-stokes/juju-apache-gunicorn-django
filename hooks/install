@@ -1,0 +1,88 @@
+#!/bin/bash
+# set -eux
+
+source $(dirname "$0")/common.sh
+
+juju-log "Jujuing ${UNIT_NAME}"
+
+###############################################################################
+# Directory Structure
+###############################################################################
+function inflate {
+    juju-log "Creating directory structure"
+    mkdir -p ${UNIT_DIR}
+    mkdir -p /var/log/celery
+    mkdir -p /var/run/celery
+    mkdir -p ${UNIT_DIR}/.supportdb-cache
+}
+
+###############################################################################
+#  User / Group permissions
+###############################################################################
+function set_perms {
+    juju-log "Setting permissions"
+
+    getent group ${GROUP_CODE_RUNNER} ${GROUP_CODE_OWNER} >> /dev/null
+    if [[ $? -eq 2 ]]; then
+        addgroup --quiet $GROUP_CODE_OWNER
+        addgroup --quiet $GROUP_CODE_RUNNER
+    fi
+
+    # Check if the users already exists and create a new user if it doesn't
+    if [[ ! `users` =~ ${USER_CODE_OWNER} ]]; then
+	adduser --quiet --system --disabled-password --ingroup \
+            ${GROUP_CODE_OWNER} ${USER_CODE_OWNER}
+    fi
+    if [[ ! `users` =~ ${USER_CODE_RUNNER} ]]; then
+	adduser --quiet --system --disabled-password --ingroup \
+            ${GROUP_CODE_RUNNER} ${USER_CODE_RUNNER}
+    fi
+
+    chown -R $USER_CODE_OWNER:$GROUP_CODE_OWNER ${UNIT_DIR}
+
+    usermod -G www-data ${GROUP_CODE_RUNNER}
+
+}
+
+###############################################################################
+# Project Install
+###############################################################################
+function app_install {
+    tar -xf ${CHARM_DIR}/files/${DJANGO_APP_PAYLOAD} -C ${UNIT_DIR}
+
+    juju-log "Installing required packages."
+    # Additional supporting packages
+    /usr/bin/apt-add-repository -y ppa:gunicorn/ppa
+
+    # Common packages between instances
+    common_pkgs="python-pip python-dev build-essential libpq-dev python-django python-dateutil python-psycopg2 python-jinja2 pwgen ssl-cert gunicorn"
+    # Silence apt-get
+    export DEBIAN_FRONTEND=noninteractive
+    REQUIREMENTS=$(config-get requirements)
+    if [[ ${INSTANCE_TYPE} == 'production' ]]; then
+	apt-get -qq update
+	# Install required packages
+	apt-get -qq install -y python-amqplib python-anyjson \
+	    python-bzrlib python-celery python-cherrypy \
+	    python-django-celery python-django-openid-auth \
+	    python-django-south python-launchpadlib python-oauth python-openid \
+	    python-psycopg2 python-requests-oauthlib python-urllib3 python-salesforce \
+	    python-cheetah ${common_pkgs}
+    else
+	apt-get -qq update
+	apt-get -qq install -y ${common_pkgs}
+	pip install -q -r ${UNIT_DIR}/${REQUIREMENTS} || true
+    fi
+}
+
+###############################################################################
+# MAIN
+# Steps
+# -----
+# 1) inflate - build directory stucture
+# 2) app_install - install bits
+# 3) set_perms - finalizes permission settings
+###############################################################################
+inflate
+app_install
+set_perms

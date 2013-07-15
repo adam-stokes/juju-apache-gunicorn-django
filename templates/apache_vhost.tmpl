@@ -1,0 +1,37 @@
+# Managed by juju
+<VirtualHost *:80>
+    ServerName      {{ servername }}
+    Redirect permanent / https://{{ servername }}/
+</VirtualHost>
+
+<VirtualHost {{ servername }}:443>
+    ServerName      {{ servername }}
+    ServerAdmin     admin@example.com
+
+    CustomLog       /var/log/djangoapp-custom.log combined
+    ErrorLog        /var/log/djangoapp-error.log
+
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-cts.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-cts.key
+
+    RequestHeader set X-FORWARDED-SSL "on"
+
+    # This ensures django is seeing the https protocol
+    # and prefixing all URLS with https
+
+    RequestHeader set X-FORWARDED_PROTO "https"
+
+    ProxyRequests off
+    ProxyPreserveHost off
+    <Proxy *>
+        Order Allow,Deny
+        Allow from All
+    </Proxy>
+
+    ProxyPass / http://{{ djangoapp_gunicorn }}/
+    ProxyPassReverse / http://{{ djangoapp_gunicorn }}/
+    
+</VirtualHost>
+

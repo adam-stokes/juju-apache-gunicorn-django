@@ -1,0 +1,8 @@
+#!/bin/bash
+set -x
+unit_name=${JUJU_UNIT_NAME//\//-}
+
+relation-set port=8080 hostname=`unit-get private-address`
+relation-set all_services="
+  - {service_name: gunicorn, service_port: 8080}
+"
