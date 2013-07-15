@@ -7,13 +7,20 @@ Example charm repository for setting up Apache+SSL, gunicorn, django, and postgr
 
 ### get latest charm
 
+```
 $ git clone git@github.com:battlemidget/juju-apache-gunicorn-django.git
+```
 
 ### tar up django application
+
+```
 tar -cjf charms/precise/django-deploy-charm/files/djangoapp.tar.bz2 -C django-app .
+```
+
 
 ## Deploy
 
+```
 juju bootstrap
 
 ### Deploy the application charm
@@ -40,3 +47,4 @@ juju add-relation django-deploy-charm:db postgresql:db
 
 ### Expose service
 juju expose apache2
+```
