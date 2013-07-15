@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 
-$(dirname "$0")/install
+${CHARM_DIR}/hooks/install

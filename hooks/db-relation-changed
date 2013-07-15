@@ -3,7 +3,7 @@ set -e
 
 # Update the juju_settings.py with the new database credentials
 
-source $(dirname "$0")/common.sh
+source ${CHARM_DIR}/hooks/common.sh
 
 ###############################################################################
 # Export Database settings
