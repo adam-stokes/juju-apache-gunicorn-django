@@ -48,3 +48,7 @@ juju add-relation django-deploy-charm:db postgresql:db
 ### Expose service
 juju expose apache2
 ```
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/battlemidget/juju-apache-gunicorn-django/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
